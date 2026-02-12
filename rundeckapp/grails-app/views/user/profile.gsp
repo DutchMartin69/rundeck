@@ -99,10 +99,10 @@
                         <g:set var="supportedLangs" value="${
                             [
                                 en_US : '🇺🇸 English',
-                                es_419: '🇲🇽 Español (LatAm)',
+                                es_419: '🇲🇽 Español',
                                 fr_FR : '🇫🇷 Français',
                                 ja_JP : '🇯🇵 Japanese',
-                                zh_CN : '🇨🇳 Chinese (Simplified)',
+                                zh_CN : '🇨🇳 Chinese',
                             ]
                         }"/>
                         <g:select class="form-control" name="language" id="language" onchange="changeLanguage();"
