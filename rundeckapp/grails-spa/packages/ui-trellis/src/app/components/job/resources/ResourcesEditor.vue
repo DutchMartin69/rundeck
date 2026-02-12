@@ -4,7 +4,7 @@
       <div class="col-sm-2" style="text-align: right">
         <label class="control-label">
           <ui-socket section="resources-editor" location="section-title">
-            {{ $t("resourcesEditor.Nodes") }}
+            {{ $t("execution.page.show.tab.Nodes.title") }}
           </ui-socket>
         </label>
         <ui-socket section="resources-editor" location="section-title-help" />
@@ -25,7 +25,7 @@
               section="resources-editor"
               location="node-dispatch-true-label"
             >
-              {{ $t("resourcesEditor.Dispatch to Nodes") }}
+              {{ $t("dispatch.to.nodes") }}
             </ui-socket>
           </label>
         </div>
