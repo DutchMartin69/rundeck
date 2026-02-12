@@ -11,11 +11,17 @@ import { mergeDeep } from "./objectUtils";
 
 const internationalization = {
   en_US: en_US,
+  en: en_US,
   es_419: es_419,
+  es: es_419,
   fr_FR: fr_FR,
+  fr: fr_FR,
   ja_JP: ja_JP,
+  ja: ja_JP,
   pt_BR: pt_BR,
+  pt: pt_BR,
   zh_CN: zh_CN,
+  zh: zh_CN,
 };
 
 const initI18n = (options = {}) => {

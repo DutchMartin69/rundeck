@@ -101,6 +101,7 @@
                                 en_US : 'English',
                                 es_419: 'Español',
                                 fr_FR : 'Français',
+                                ja_JP : '日本語',
                                 zh_CN : '简体中文',
                             ]
                         }"/>

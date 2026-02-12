@@ -77,6 +77,16 @@ const messages = {
   message_userSummary: {
     desc: "This is a list of User Profiles which have logged in to Rundeck.",
   },
+  notifications: {
+    helpText: "通知はジョブ実行中のさまざまなイベントでトリガーできます。",
+    emptyText:
+      "通知は定義されていません。下のイベントをクリックして、そのトリガーの通知を追加してください。",
+    addButton: "通知を追加",
+    triggerLabel: "トリガー",
+    selectTrigger: "トリガーを選択",
+    typeLabel: "通知タイプ",
+    selectNotification: "通知を選択",
+  },
   message_webhookPageTitle: "Webhooks",
   message_webhookListTitle: "Webhooks",
   message_webhookDetailTitle: "Webhook Detail",
@@ -409,6 +419,158 @@ const messages = {
   "project.nodes.edit.empty.description": "Note: No content was available.",
   "button.action.Cancel": "Cancel",
   "button.action.Save": "Save",
+  "Activity for Jobs": "ジョブのアクティビティ",
+  "Add Notification": "通知を追加",
+  "Add a new Node Enhancer": "新しい Node Enhancer を追加",
+  "Add a new Node Source": "新しい Node Source を追加",
+  "Add an option": "オプションを追加",
+  "All Jobs": "すべてのジョブ",
+  "Allow this Job to be executed?": "このジョブの実行を許可しますか？",
+  "Allow this Job to be scheduled?": "このジョブのスケジュール実行を許可しますか？",
+  "Also kill processes whose process SID matches the tracked PIDs":
+    "追跡中の PID と一致するプロセス SID のプロセスも終了する",
+  Any: "任意",
+  "Any Time": "期間指定なし",
+  "Collapse All": "すべて折りたたむ",
+  Configuration: "設定",
+  Enhancers: "Enhancers",
+  "Execute locally": "ローカルで実行",
+  "Execution.plural": "実行",
+  Executions: "実行",
+  "Expand All": "すべて展開",
+  Explain: "説明",
+  "Global Log Filters": "グローバルログフィルター",
+  "Kill all processes collected by the 'Capture Process IDs' log filter":
+    "'Capture Process IDs' ログフィルターで収集したすべてのプロセスを終了する",
+  "Kill processes only if job failed or is killed":
+    "ジョブが失敗または強制終了された場合のみプロセスを終了する",
+  "Kill spawned processes": "生成されたプロセスを終了",
+  "Kill tracked processes after execution": "実行後に追跡中プロセスを終了",
+  Modules: "モジュール",
+  "More...": "詳細...",
+  No: "いいえ",
+  "No Options": "オプションはありません",
+  "No Workflow steps": "Workflow ステップはありません",
+  "Node Enhancers can modify the data loaded from Node Sources.":
+    "Node Enhancers は Node Sources から読み込んだデータを変更できます。",
+  "Node First": "Node First",
+  "Node Sources for the project. Sources are loaded in the defined order, with later sources overriding earlier sources. (You can use  {'${project.name}'} inside configuration values to substitute the project name.)":
+    "プロジェクトの Node Sources。Sources は定義順に読み込まれ、後の Sources が前の Sources を上書きします。（設定値内では {'${project.name}'} を使用してプロジェクト名に置き換えできます。）",
+  "Node Sources for the project. Sources are loaded in the defined order, with later sources overriding earlier sources. (You can use ${project.name} inside configuration values to substitute the project name.)":
+    "プロジェクトの Node Sources。Sources は定義順に読み込まれ、後の Sources が前の Sources を上書きします。（設定値内では ${project.name} を使用してプロジェクト名に置き換えできます。）",
+  "None configured. Click NodeEnhancer to add a new plugin.":
+    "未設定です。NodeEnhancer をクリックして新しいプラグインを追加してください。",
+  "None configured. Click ResourceModelSource to add a new plugin.":
+    "未設定です。ResourceModelSource をクリックして新しいプラグインを追加してください。",
+  "Other...": "その他...",
+  "Provides the local node as the single resource":
+    "ローカルノードを単一リソースとして提供します",
+  "Reads a file containing node definitions in a supported format":
+    "サポート形式のノード定義ファイルを読み込みます",
+  "Retrieves a URL containing node definitions in a supported format":
+    "サポート形式のノード定義を含む URL を取得します",
+  "Run a script to produce resource model data":
+    "スクリプトを実行してリソースモデルデータを生成します",
+  "Save Filter": "フィルターを保存",
+  "Save as a Filter...": "フィルターとして保存...",
+  "Scans a directory and loads all resource document files":
+    "ディレクトリをスキャンしてすべてのリソースドキュメントファイルを読み込みます",
+  "Search Activity": "アクティビティを検索",
+  "Selected Plugins will be enabled for this Job.":
+    "選択したプラグインはこのジョブで有効になります。",
+  "This operation will use the 'kill' and 'pkill' for Unix and 'taskkill' for Windows commands. These commands must be available at the node.":
+    "この操作では Unix では 'kill' と 'pkill'、Windows では 'taskkill' コマンドを使用します。これらのコマンドはノード上で利用可能である必要があります。",
+  "Workflow.strategy.description.node-first":
+    "次のノードに進む前に、1 ノード上ですべてのステップを実行します。",
+  "Workflow.strategy.description.step-first":
+    "次のステップに進む前に、全ノードで各ステップを実行します。",
+  "Workflow.strategy.label.node-first": "Node First",
+  "Workflow.strategy.label.parallel": "並列",
+  "Workflow.strategy.label.step-first": "Step First",
+  Yes: "はい",
+  "access.control": "アクセス制御",
+  add: "追加",
+  "all.nodes.menu.item": "-All Nodes-",
+  "button.action.Create": "作成",
+  "button.cancel": "キャンセル",
+  "button.create": "作成",
+  "collapse.all": "すべて折りたたむ",
+  "delete.project": "プロジェクトを削除",
+  "delete.project.ellipsis": "プロジェクトを削除...",
+  "description": "説明",
+  "dispatch.to.nodes": "Nodes にディスパッチ",
+  "edit.message.of.the.day": "今日のメッセージを編集",
+  "edit.nodes": "Nodes を編集",
+  "edit.nodes.title": "Nodes を編集",
+  "edit.readme": "README を編集",
+  "edit.readme.ellipsis": "README を編集...",
+  "expand.all": "すべて展開",
+  "explain": "説明",
+  "export.archive": "アーカイブをエクスポート",
+  "export.archive.ellipsis": "アーカイブをエクスポート...",
+  "global.log.filters": "グローバルログフィルター",
+  "gui.menu.AccessControl": "アクセス制御",
+  "gui.menu.KeyStorage": "キーストレージ",
+  "gui.menu.Scm": "SCM 設定",
+  "import.archive": "アーカイブをインポート",
+  "import.archive.ellipsis": "アーカイブをインポート...",
+  "message_webhookButtonRegenerate": "再生成",
+  "message_webhookFilterListPlaceholder": "Webhook を絞り込み",
+  "message_webhookNewHookName": "新しい Hook",
+  "message_webhookTabGeneral": "一般",
+  "message_webhookTabHandlerConfiguration": "ハンドラー設定",
+  "no.nodes.selected.match.nodes.by.selecting.or.entering.a.filter":
+    "Nodes が選択されていません。フィルターを選択または入力して Nodes を一致させてください。",
+  "none.configured.click.plugin.to.add.a.new.plugin":
+    "未設定です。{0} をクリックして新しいプラグインを追加してください。",
+  "notifications.addButton": "通知を追加",
+  "notifications.emptyText":
+    "通知は定義されていません。下のイベントをクリックして、そのトリガーの通知を追加してください。",
+  "notifications.helpText":
+    "通知はジョブ実行中のさまざまなイベントでトリガーできます。",
+  "notifications.selectNotification": "通知を選択",
+  "notifications.selectTrigger": "トリガーを選択",
+  "notifications.triggerLabel": "トリガー",
+  "notifications.typeLabel": "通知タイプ",
+  "project.admin.menu.Scm.title": "SCM 設定",
+  "project.node.sources.title": "Node Sources",
+  "schedule.to.run.repeatedly": "繰り返し実行をスケジュールしますか？",
+  "scheduledExecution.crontab.everyDay": "毎日",
+  "scheduledExecution.crontab.everyMonth": "毎月",
+  "scheduledExecution.crontab.field.hour": "時",
+  "scheduledExecution.crontab.field.minute": "分",
+  "scheduledExecution.crontab.help.formatting": "書式ヘルプ",
+  "scheduledExecution.crontab.help.increments": "増分:",
+  "scheduledExecution.crontab.help.increments.description":
+    "「0 から 15 単位ごと」。",
+  "scheduledExecution.crontab.help.lists": "リスト:",
+  "scheduledExecution.crontab.help.ranges": "範囲:",
+  "scheduledExecution.crontab.help.see": "参照:",
+  "scheduledExecution.crontab.help.validDayOfWeek":
+    "曜日の有効値: 1-7 または SUN-SAT",
+  "scheduledExecution.crontab.help.validMonth":
+    "月の有効値: 1-12 または JAN-DEC",
+  "scheduledExecution.crontab.tab.crontab": "Crontab",
+  "scheduledExecution.crontab.tab.simple": "Simple",
+  "scheduledExecution.property.doNodedispatch.description":
+    "このジョブをフィルター済み Nodes で実行するかローカルで実行するかを選択します。",
+  "scheduledExecution.property.excludeFilter.description":
+    "Node フィルター結果から Nodes を除外するための二次フィルターです。",
+  "scheduledExecution.property.loglevel.label": "ログレベル",
+  "scheduledExecution.property.multipleExecutions.label": "複数実行？",
+  "scheduledExecution.property.retry.delay.label": "リトライ遅延",
+  "scheduledExecution.property.retry.label": "リトライ",
+  "scheduledExecution.property.timeout.label": "タイムアウト",
+  "scheduledExecution.property.timeout.title": "タイムアウト",
+  "soft.wrap": "ソフトラップ",
+  "step.type.jobreference.nodestep.description":
+    "リモートノードでジョブを実行します",
+  "step.type.jobreference.title": "ジョブ参照",
+  "storage.enter.directory.name": "ディレクトリ名を入力",
+  "storage.enter.password": "パスワードを入力",
+  "storage.enter.path": "パスを入力",
+  "storage.specify.name": "名前を指定してください。",
+  "workflow.all.steps": "すべての Workflow ステップ",
 };
 
 export default messages;
