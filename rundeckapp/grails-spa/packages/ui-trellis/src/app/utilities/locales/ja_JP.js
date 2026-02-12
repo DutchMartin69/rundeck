@@ -6,8 +6,8 @@ const messages = {
   Revert: "Revert",
   jobAverageDurationPlaceholder: "leave blank for Job Average duration",
   resourcesEditor: {
-    "Dispatch to Nodes": "Nodes にディスパッチ",
-    Nodes: "Nodes",
+    "Dispatch to Nodes": "ノードにディスパッチ",
+    Nodes: "ノード",
   },
   uiv: {
     modal: {
@@ -223,7 +223,7 @@ const messages = {
   "enter.a.node.filter":
     "\u30ce\u30fc\u30c9\u30d5\u30a3\u30eb\u30bf\u3092\u5165\u529b\u3059\u308b\u304b\u3001.*\u3067\u3059\u3079\u3066\u306e\u30ce\u30fc\u30c9\u3092\u9078\u629e",
   "execute.locally": "\u30ed\u30fc\u30ab\u30eb\u3067\u5b9f\u884c",
-  "execution.page.show.tab.Nodes.title": "Nodes",
+  "execution.page.show.tab.Nodes.title": "ノード",
   "execution.show.mode.Log.title": "\u30ed\u30b0\u51fa\u529b",
   filter: "Filter\\:",
   "loading.matched.nodes": "Loading matched nodes...",
@@ -500,7 +500,7 @@ const messages = {
   "delete.project": "プロジェクトを削除",
   "delete.project.ellipsis": "プロジェクトを削除...",
   "description": "説明",
-  "dispatch.to.nodes": "Nodes にディスパッチ",
+  "dispatch.to.nodes": "ノードにディスパッチ",
   "edit.message.of.the.day": "今日のメッセージを編集",
   "edit.nodes": "Nodes を編集",
   "edit.nodes.title": "Nodes を編集",
@@ -522,7 +522,7 @@ const messages = {
   "message_webhookTabGeneral": "一般",
   "message_webhookTabHandlerConfiguration": "ハンドラー設定",
   "no.nodes.selected.match.nodes.by.selecting.or.entering.a.filter":
-    "Nodes が選択されていません。フィルターを選択または入力して Nodes を一致させてください。",
+    "ノードが選択されていません。フィルターを選択または入力してノードを一致させてください。",
   "none.configured.click.plugin.to.add.a.new.plugin":
     "未設定です。{0} をクリックして新しいプラグインを追加してください。",
   "notifications.addButton": "通知を追加",
@@ -555,9 +555,9 @@ const messages = {
   "scheduledExecution.crontab.tab.crontab": "Crontab",
   "scheduledExecution.crontab.tab.simple": "Simple",
   "scheduledExecution.property.doNodedispatch.description":
-    "このジョブをフィルター済み Nodes で実行するかローカルで実行するかを選択します。",
+    "このジョブをフィルター済みノードで実行するかローカルで実行するかを選択します。",
   "scheduledExecution.property.excludeFilter.description":
-    "Node フィルター結果から Nodes を除外するための二次フィルターです。",
+    "ノードフィルター結果からノードを除外するための二次フィルターです。",
   "scheduledExecution.property.loglevel.label": "ログレベル",
   "scheduledExecution.property.multipleExecutions.label": "複数実行？",
   "scheduledExecution.property.retry.delay.label": "リトライ遅延",
