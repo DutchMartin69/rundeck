@@ -1,7 +1,9 @@
 <template>
   <div v-if="modelData">
     <div class="form-group">
-      <label class="col-sm-2 control-label"> Log level </label>
+      <label class="col-sm-2 control-label">
+        {{ $t("scheduledExecution.property.loglevel.label") }}
+      </label>
       <div class="col-sm-10">
         <div class="radio radio-inline">
           <input
@@ -33,7 +35,9 @@
       </div>
     </div>
     <div class="form-group">
-      <label class="col-sm-2 control-label"> Multiple Executions? </label>
+      <label class="col-sm-2 control-label">
+        {{ $t("scheduledExecution.property.multipleExecutions.label") }}
+      </label>
       <div class="col-sm-10">
         <div class="radio radio-inline">
           <input
@@ -43,7 +47,7 @@
             name="multipleExecutions"
             :value="false"
           />
-          <label for="multipleFalse"> No </label>
+          <label for="multipleFalse"> {{ $t("No") }} </label>
         </div>
         <div class="radio radio-inline">
           <input
@@ -53,7 +57,7 @@
             name="multipleExecutions"
             :value="true"
           />
-          <label for="multipleTrue"> Yes </label>
+          <label for="multipleTrue"> {{ $t("Yes") }} </label>
         </div>
         <div class="help-block">
           {{ $t("scheduledExecution.property.multipleExecutions.description") }}
@@ -81,7 +85,9 @@
       </div>
     </div>
     <div class="form-group">
-      <div class="col-sm-2 control-label text-form-label">Timeout</div>
+      <div class="col-sm-2 control-label text-form-label">
+        {{ $t("scheduledExecution.property.timeout.label") }}
+      </div>
 
       <div :class="fieldColHalfSize">
         <input
@@ -98,7 +104,9 @@
     </div>
     <div class="form-group">
       <div class="col-sm-2 control-label">
-        <label for="schedJobRetry">Retry</label>
+        <label for="schedJobRetry">{{
+          $t("scheduledExecution.property.retry.label")
+        }}</label>
       </div>
 
       <div :class="fieldColShortSize">
@@ -116,7 +124,7 @@
       </div>
 
       <label class="col-sm-2 control-label text-form-label">
-        Retry Delay
+        {{ $t("scheduledExecution.property.retry.delay.label") }}
       </label>
 
       <div :class="fieldColShortSize">
@@ -185,7 +193,9 @@
             id="schedJobLogOutputThresholdStatus"
             v-model="modelData.logOutputThresholdStatus"
             v-tooltip.left.hover="
-              'Enter a status, such as \'failed\', \'aborted\' or any custom status.'
+              $t(
+                'scheduledExecution.property.logOutputThresholdAction.halt.description',
+              )
             "
             type="text"
             name="logOutputThresholdStatus"

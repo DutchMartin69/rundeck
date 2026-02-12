@@ -1,12 +1,12 @@
 const messages = {
-  Edit: "Edit",
+  Edit: "編集",
   Save: "Save",
   Delete: "Delete",
   Cancel: "Cancel",
   Revert: "Revert",
   jobAverageDurationPlaceholder: "leave blank for Job Average duration",
   resourcesEditor: {
-    "Dispatch to Nodes": "Dispatch to Nodes",
+    "Dispatch to Nodes": "Nodes にディスパッチ",
     Nodes: "Nodes",
   },
   uiv: {
@@ -228,8 +228,8 @@ const messages = {
   filter: "Filter\\:",
   "loading.matched.nodes": "Loading matched nodes...",
   "loading.text": "\u30ed\u30fc\u30c9\u4e2d...",
-  "loglevel.debug": "Debug",
-  "loglevel.normal": "Normal",
+  "loglevel.debug": "デバッグ",
+  "loglevel.normal": "標準",
   "matched.nodes.prompt": "\u30de\u30c3\u30c1\u3057\u305f\u30ce\u30fc\u30c9",
   no: "\u3044\u3044\u3048",
   "node.access.not-runnable.message":
@@ -242,16 +242,17 @@ const messages = {
   "notification.event.onfailure": "\u5931\u6557\u6642",
   "notification.event.onsuccess": "\u6210\u529f\u6642",
   "notification.event.onstart": "\u958b\u59cb\u6642",
-  "notification.event.onavgduration": "Average Duration Exceeded",
-  "notification.event.onretryablefailure": "On Retryable Failure",
+  "notification.event.onavgduration": "平均実行時間超過",
+  "notification.event.onretryablefailure": "再試行可能な失敗時",
   refresh: "\u66f4\u65b0",
   "save.filter.ellipsis": "Save Filter\u2026",
   "search.ellipsis": "Search\u2026",
   "ScheduledExecution.page.edit.title": "\u30b8\u30e7\u30d6\u306e\u7de8\u96c6",
   "ScheduledExecution.page.create.title":
     "\u65b0\u3057\u3044\u30b8\u30e7\u30d6\u3092\u4f5c\u6210",
-  "scheduledExecution.property.defaultTab.label": "Default Tab",
-  "scheduledExecution.property.defaultTab.description": "Default Tab",
+  "scheduledExecution.property.defaultTab.label": "デフォルトタブ",
+  "scheduledExecution.property.defaultTab.description":
+    "実行を開いたときに表示するデフォルトタブ。",
   "scheduledExecution.property.excludeFilterUncheck.label":
     "Show Excluded Nodes",
   "scheduledExecution.property.excludeFilterUncheck.description":
@@ -259,26 +260,27 @@ const messages = {
   "scheduledExecution.property.logOutputThreshold.label":
     "\u30ed\u30b0\u51fa\u529b\u306e\u4e0a\u9650",
   "scheduledExecution.property.logOutputThreshold.description":
-    'Enter either maximum total line-count (e.g. "100"), maximum per-node line-count ("100/node"), or maximum log file size ' +
-    '("100MB", "100KB", etc.), using "GB","MB","KB","B" as Giga- Mega- Kilo- and bytes.',
+    '最大総行数（例: "100"）、ノードごとの最大行数（"100/node"）、または最大ログファイルサイズ（"100MB"、"100KB" など）を入力します。' +
+    '単位は "GB"、"MB"、"KB"、"B" を使用します。',
   "scheduledExecution.property.logOutputThreshold.placeholder":
     "E.g as '100', '100/node' or '100MB'",
   "scheduledExecution.property.logOutputThresholdAction.label":
-    "Log Limit Action",
+    "ログ制限時の動作",
   "scheduledExecution.property.logOutputThresholdAction.description":
-    "Action to perform if the output limit is reached.",
+    "出力上限に達した場合に実行する動作です。",
   "scheduledExecution.property.logOutputThresholdAction.halt.label":
-    "Halt with status:",
+    "ステータスを指定して停止:",
+  "scheduledExecution.property.logOutputThresholdAction.halt.description":
+    "「failed」「aborted」または任意のカスタムステータスを入力します。",
   "scheduledExecution.property.logOutputThresholdAction.truncate.label":
-    "Truncate and continue",
+    "切り詰めて続行",
   "scheduledExecution.property.logOutputThresholdStatus.placeholder":
     "'failed','aborted', or any string",
   "scheduledExecution.property.loglevel.help":
     "Debug\u30ec\u30d9\u30eb\u306e\u5834\u5408\u3001\u3088\u308a\u591a\u304f\u51fa\u529b\u3055\u308c\u308b",
-  "scheduledExecution.property.maxMultipleExecutions.label":
-    "Limit Multiple Executions?",
+  "scheduledExecution.property.maxMultipleExecutions.label": "同時実行数を制限？",
   "scheduledExecution.property.maxMultipleExecutions.description":
-    "Max number of multiple executions. Use blank or 0 to indicate no limit.",
+    "同時実行の最大数。空欄または 0 は無制限です。",
   "scheduledExecution.property.multipleExecutions.description":
     "\u3053\u306e\u30b8\u30e7\u30d6\u3092\u4e00\u5ea6\u306b\u8907\u6570\u5b9f\u884c\u3059\u308b\u304b",
   "scheduledExecution.property.nodeKeepgoing.prompt":
@@ -306,23 +308,23 @@ const messages = {
     "\u30bf\u30fc\u30b2\u30c3\u30c8\u30ce\u30fc\u30c9\u306f\u30c7\u30d5\u30a9\u30eb\u30c8\u3067\u9078\u629e\u3055\u308c\u3066\u3044\u308b",
   "scheduledExecution.property.nodesSelectedByDefault.false.description":
     "\u660e\u793a\u7684\u306b\u30ce\u30fc\u30c9\u3092\u9078\u629e\u3059\u308b\u5fc5\u8981\u304c\u3042\u308a\u307e\u3059",
-  "scheduledExecution.property.notifyAvgDurationThreshold.label": "Threshold",
+  "scheduledExecution.property.notifyAvgDurationThreshold.label": "しきい値",
   "scheduledExecution.property.notifyAvgDurationThreshold.description":
-    "Optional duration threshold to trigger the notifications. If not specified, the Job Average duration will be used.\n\n" +
-    "- percentage of average: `20%`\n" +
-    "- time delta from the average: `+20s`, `+20`\n" +
-    "- absolute time: `30s`, `5m`\n" +
-    "Use `s`,`m`,`h`,`d`,`w`,`y` etc as time units for seconds, minutes, hours, etc.\n" +
-    "Unit will be seconds if it is not specified.\n\n" +
-    "Can include option value references like `{'$'}{'{'}option{'.'}avgDurationThreshold{'}'}`.",
+    "通知を発生させる任意の実行時間しきい値です。未指定の場合はジョブ平均実行時間を使用します。\n\n" +
+    "- 平均に対する割合: `20%`\n" +
+    "- 平均からの時間差: `+20s`, `+20`\n" +
+    "- 絶対時間: `30s`, `5m`\n" +
+    "秒・分・時間などの単位には `s`,`m`,`h`,`d`,`w`,`y` を使用します。\n" +
+    "単位未指定時は秒として扱われます。\n\n" +
+    "`${option.avgDurationThreshold}` のようにオプション値参照も使用できます。",
   "scheduledExecution.property.orchestrator.label":
     "\u30aa\u30fc\u30b1\u30b9\u30c8\u30ec\u30fc\u30bf",
   "scheduledExecution.property.orchestrator.description":
     "\u9806\u5e8f\u3092\u5236\u5fa1\u306b\u4f7f\u3046\u3002This can be used to control the order and timing in which nodes are processed",
   "scheduledExecution.property.retry.delay.description":
-    "The time between the failed execution and the retry. Time in seconds, " +
-    'or specify time units: "120m", "2h", "3d".  Use blank or 0 to indicate no delay. Can include option value ' +
-    "references like \"{'$'}{'{'}option{'.'}delay{'}'}\".",
+    "失敗した実行から再試行までの待機時間。秒で指定するか、" +
+    '"120m"、"2h"、"3d" のように単位付きで指定します。空欄または 0 は遅延なしです。' +
+    '${option.delay} のようにオプション値参照を含められます。',
   "scheduledExecution.property.retry.description":
     "\u30b8\u30e7\u30d6\u304c\u76f4\u63a5\u5b9f\u884c\u3055\u308c\u305f\u3068\u304d\u306e\u6700\u5927\u30ea\u30c8\u30e9\u30a4\u5b9f\u884c\u56de\u6570\u3002\u30ea\u30c8\u30e9\u30a4\u306f\u30b8\u30e7\u30d6\u304c\u5931\u6557\u3057\u305f\u3068\u304d\u3001\u307e\u305f\u306f\u30bf\u30a4\u30e0\u30a2\u30a6\u30c8\u306b\u306a\u3063\u305f\u3068\u304d\u306b\u5b9f\u884c\u3055\u308c\u308b\u3002\u624b\u52d5\u3067Kill\u3055\u308c\u305f\u5834\u5408\u306f\u3001\u30ea\u30c8\u30e9\u30a4\u3055\u308c\u306a\u3044\u3002\"{'$'}{'{'}option{'.'}retry{'}'}\"\u306e\u3088\u3046\u306a\u66f8\u5f0f\u3067\u30aa\u30d7\u30b7\u30e7\u30f3\u5024\u3092\u53c2\u7167\u3067\u304d\u308b\u3002",
   "scheduledExecution.property.successOnEmptyNodeFilter.prompt":
@@ -571,6 +573,10 @@ const messages = {
   "storage.enter.path": "パスを入力",
   "storage.specify.name": "名前を指定してください。",
   "workflow.all.steps": "すべての Workflow ステップ",
+  "util.undoredo.undo": "元に戻す",
+  "util.undoredo.redo": "やり直し",
+  "util.undoredo.revertAll": "すべての変更を元に戻す",
+  "options.label": "オプション",
 };
 
 export default messages;

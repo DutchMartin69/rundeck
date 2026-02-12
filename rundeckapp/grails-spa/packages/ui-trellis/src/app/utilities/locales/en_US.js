@@ -315,6 +315,8 @@ const messages = {
     "Action to perform if the output limit is reached.",
   "scheduledExecution.property.logOutputThresholdAction.halt.label":
     "Halt with status:",
+  "scheduledExecution.property.logOutputThresholdAction.halt.description":
+    "Enter a status, such as 'failed', 'aborted' or any custom status.",
   "scheduledExecution.property.logOutputThresholdAction.label":
     "Log Limit Action",
   "scheduledExecution.property.logOutputThresholdAction.truncate.label":
