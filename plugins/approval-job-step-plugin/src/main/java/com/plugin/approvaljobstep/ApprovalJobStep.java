@@ -5,16 +5,27 @@ import com.dtolabs.rundeck.core.storage.ResourceMeta;
 import com.dtolabs.rundeck.core.execution.workflow.steps.StepException;
 import com.dtolabs.rundeck.core.execution.workflow.steps.StepFailureReason;
 import com.dtolabs.rundeck.core.plugins.Plugin;
+import com.dtolabs.rundeck.core.plugins.configuration.Description;
+import com.dtolabs.rundeck.core.plugins.configuration.Describable;
+import com.dtolabs.rundeck.core.plugins.configuration.DynamicProperties;
+import com.dtolabs.rundeck.core.plugins.configuration.Property;
+import com.dtolabs.rundeck.core.plugins.configuration.PropertyScope;
+import com.dtolabs.rundeck.core.plugins.configuration.StringRenderingConstants;
 import com.dtolabs.rundeck.plugins.descriptions.PluginDescription;
 import com.dtolabs.rundeck.plugins.descriptions.PluginProperty;
 import com.dtolabs.rundeck.plugins.descriptions.RenderingOption;
 import com.dtolabs.rundeck.plugins.descriptions.RenderingOptions;
 import com.dtolabs.rundeck.plugins.step.PluginStepContext;
 import com.dtolabs.rundeck.plugins.step.StepPlugin;
+import com.dtolabs.rundeck.plugins.util.DescriptionBuilder;
+import com.dtolabs.rundeck.plugins.util.PropertyBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.rundeck.storage.api.PathUtil;
 import org.rundeck.storage.api.Resource;
+import org.rundeck.app.spi.Services;
 
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -25,12 +36,23 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,12 +63,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
     title = "Approval Job Step",
     description = "Inserts a user approval step into a job workflow with sequential email approvals and callback links."
 )
-public class ApprovalJobStep implements StepPlugin {
+public class ApprovalJobStep implements StepPlugin, Describable, DynamicProperties {
+    private static final String PROP_APPROVAL_MESSAGE = "approvalMessage";
+    private static final String PROP_APPROVAL_TIMEOUT_MINUTES = "approvalTimeoutMinutes";
+    private static final String PROP_AUTO_APPROVE_ON_TIMEOUT = "autoApproveOnTimeout";
+    private static final String PROP_PRIMARY_APPROVER_EMAIL = "primaryApproverEmail";
+    private static final String PROP_SECONDARY_APPROVER_EMAIL = "secondaryApproverEmail";
+    private static final String PROP_ESCALATION_TIME_MINUTES = "escalationTimeMinutes";
+    private static final String PROP_SMTP_SERVER = "smtpServer";
+    private static final String PROP_SMTP_PORT = "smtpPort";
+    private static final String PROP_SMTP_USERNAME = "smtpUsername";
+    private static final String PROP_SMTP_PASSWORD_PATH = "smtpPasswordPath";
+    private static final String PROP_FROM_EMAIL_ADDRESS = "fromEmailAddress";
+    private static final String PROP_USE_TLS = "useTls";
+    private static final String PROP_APPROVAL_URL_BASE = "approvalUrlBase";
+    private static final String PROP_CHECK_INTERVAL_SECONDS = "checkIntervalSeconds";
+
     private static final int CALLBACK_PORT = 5555;
+    private static final Logger LOG = LoggerFactory.getLogger(ApprovalJobStep.class);
     private static final AtomicBoolean CALLBACK_SERVER_STARTED = new AtomicBoolean(false);
     private static final Map<String, String> APPROVAL_RESULTS = new ConcurrentHashMap<>();
     private static final Map<String, String> APPROVAL_TOKENS = new ConcurrentHashMap<>();
     private static final Map<String, String> APPROVAL_APPROVER = new ConcurrentHashMap<>();
+    private static final Object USER_CACHE_LOCK = new Object();
+    private static final long USER_CACHE_TTL_MS = 60_000L;
+    private static volatile UserSelectData USER_SELECT_CACHE;
+    private static volatile long USER_SELECT_CACHE_TS;
 
     @PluginProperty(title = "Approval Message", description = "Message sent to approvers", required = true)
     @RenderingOptions({@RenderingOption(key = "displayType", value = "MULTI_LINE"), @RenderingOption(key = "groupName", value = "Approval Configuration")})
@@ -108,6 +150,149 @@ public class ApprovalJobStep implements StepPlugin {
     @PluginProperty(title = "Check Interval (seconds)", description = "Polling interval", defaultValue = "30", required = false)
     @RenderingOptions({@RenderingOption(key = "groupName", value = "Advanced Options"), @RenderingOption(key = "grouping", value = "secondary")})
     private Integer checkIntervalSeconds;
+
+    @Override
+    public Description getDescription() {
+        UserSelectData selectData = loadUserSelectData();
+        DescriptionBuilder builder = DescriptionBuilder.builder();
+        builder.name("approval-job-step")
+            .title("Approval Job Step")
+            .description("Inserts a user approval step into a job workflow with sequential email approvals and callback links.");
+
+        builder.property(PropertyBuilder.builder()
+            .string(PROP_APPROVAL_MESSAGE)
+            .title("Approval Message")
+            .description("Message sent to approvers")
+            .required(true)
+            .renderingOption(StringRenderingConstants.DISPLAY_TYPE_KEY, StringRenderingConstants.DisplayType.MULTI_LINE)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Approval Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .integer(PROP_APPROVAL_TIMEOUT_MINUTES)
+            .title("Approval Timeout (minutes)")
+            .description("Maximum wait time")
+            .defaultValue("60")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Approval Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .booleanType(PROP_AUTO_APPROVE_ON_TIMEOUT)
+            .title("Auto-approve on Timeout")
+            .description("Auto approve when timeout reached")
+            .defaultValue("false")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Approval Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .type(Property.Type.FreeSelect)
+            .name(PROP_PRIMARY_APPROVER_EMAIL)
+            .title("Primary Approver")
+            .description("Select a user email or enter a custom email address")
+            .required(true)
+            .values(selectData.values)
+            .labels(selectData.labels)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Sequential Approvers"));
+
+        builder.property(PropertyBuilder.builder()
+            .type(Property.Type.FreeSelect)
+            .name(PROP_SECONDARY_APPROVER_EMAIL)
+            .title("Secondary Approver (Escalation)")
+            .description("Optional escalation approver")
+            .required(false)
+            .values(selectData.values)
+            .labels(selectData.labels)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Sequential Approvers"));
+
+        builder.property(PropertyBuilder.builder()
+            .integer(PROP_ESCALATION_TIME_MINUTES)
+            .title("Escalation Time (minutes)")
+            .description("Escalation delay")
+            .defaultValue("30")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Sequential Approvers"));
+
+        builder.property(PropertyBuilder.builder()
+            .string(PROP_SMTP_SERVER)
+            .title("SMTP Server")
+            .description("SMTP host")
+            .required(true)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Email Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .integer(PROP_SMTP_PORT)
+            .title("SMTP Port")
+            .description("SMTP port")
+            .defaultValue("587")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Email Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .string(PROP_SMTP_USERNAME)
+            .title("SMTP Username")
+            .description("SMTP username")
+            .required(true)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Email Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .string(PROP_SMTP_PASSWORD_PATH)
+            .title("SMTP Password Path")
+            .description("Key Storage path for SMTP password")
+            .required(true)
+            .renderingOption(StringRenderingConstants.SELECTION_ACCESSOR_KEY, StringRenderingConstants.SelectionAccessor.STORAGE_PATH)
+            .renderingOption(StringRenderingConstants.STORAGE_PATH_ROOT_KEY, "keys")
+            .renderingOption(StringRenderingConstants.STORAGE_FILE_META_FILTER_KEY, "Rundeck-data-type=password")
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Email Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .string(PROP_FROM_EMAIL_ADDRESS)
+            .title("From Email Address")
+            .description("Sender address")
+            .required(true)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Email Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .booleanType(PROP_USE_TLS)
+            .title("Use TLS")
+            .description("Enable SMTP STARTTLS")
+            .defaultValue("true")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Email Configuration"));
+
+        builder.property(PropertyBuilder.builder()
+            .string(PROP_APPROVAL_URL_BASE)
+            .title("Approval URL Base")
+            .description("Base URL for approve/deny links")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Advanced Options")
+            .renderingOption(StringRenderingConstants.GROUPING, "secondary"));
+
+        builder.property(PropertyBuilder.builder()
+            .integer(PROP_CHECK_INTERVAL_SECONDS)
+            .title("Check Interval (seconds)")
+            .description("Polling interval")
+            .defaultValue("30")
+            .required(false)
+            .renderingOption(StringRenderingConstants.GROUP_NAME, "Advanced Options")
+            .renderingOption(StringRenderingConstants.GROUPING, "secondary"));
+
+        return builder.build();
+    }
+
+    @Override
+    public Map<String, Object> dynamicProperties(Map<String, Object> projectAndFrameworkValues, Services services) {
+        UserSelectData selectData = loadUserSelectData();
+        if (selectData.values.isEmpty()) {
+            System.err.println("ApprovalJobStep dynamicProperties: no users loaded");
+            LOG.warn("ApprovalJobStep dynamicProperties: no users loaded");
+            return null;
+        }
+        System.err.println("ApprovalJobStep dynamicProperties: loaded " + selectData.values.size() + " users");
+        LOG.info("ApprovalJobStep dynamicProperties: loaded {} users", selectData.values.size());
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put(PROP_PRIMARY_APPROVER_EMAIL, selectData.labels);
+        out.put(PROP_SECONDARY_APPROVER_EMAIL, selectData.labels);
+        return out;
+    }
 
     @Override
     public void executeStep(PluginStepContext context, Map<String, Object> configuration) throws StepException {
@@ -445,5 +630,156 @@ public class ApprovalJobStep implements StepPlugin {
         if (val == null) return dflt;
         if (val instanceof Boolean) return (Boolean) val;
         return "true".equalsIgnoreCase(String.valueOf(val).trim());
+    }
+
+    private static UserSelectData loadUserSelectData() {
+        long now = System.currentTimeMillis();
+        UserSelectData cached = USER_SELECT_CACHE;
+        if (cached != null && (now - USER_SELECT_CACHE_TS) < USER_CACHE_TTL_MS) {
+            return cached;
+        }
+        synchronized (USER_CACHE_LOCK) {
+            cached = USER_SELECT_CACHE;
+            if (cached != null && (now - USER_SELECT_CACHE_TS) < USER_CACHE_TTL_MS) {
+                return cached;
+            }
+            UserSelectData loaded = fetchUserSelectData();
+            USER_SELECT_CACHE = loaded;
+            USER_SELECT_CACHE_TS = now;
+            return loaded;
+        }
+    }
+
+    private static UserSelectData fetchUserSelectData() {
+        String dbUrl = System.getenv("RUNDECK_DATABASE_URL");
+        String dbUser = System.getenv("RUNDECK_DATABASE_USERNAME");
+        String dbPass = System.getenv("RUNDECK_DATABASE_PASSWORD");
+        String dbDriver = System.getenv("RUNDECK_DATABASE_DRIVER");
+
+        if (isBlank(dbUrl) || isBlank(dbUser) || dbPass == null) {
+            System.err.println("ApprovalJobStep: DB env not set for user dropdowns");
+            LOG.warn("ApprovalJobStep: DB env not set for user dropdowns (url/user/pass missing)");
+            DbConfig fallback = readDbConfigFromFile();
+            if (fallback == null) {
+                return UserSelectData.empty();
+            }
+            dbUrl = fallback.url;
+            dbUser = fallback.user;
+            dbPass = fallback.pass;
+            dbDriver = fallback.driver;
+        }
+
+        if (!isBlank(dbDriver)) {
+            try {
+                Class.forName(dbDriver);
+            } catch (ClassNotFoundException ignored) {
+                System.err.println("ApprovalJobStep: DB driver not found: " + dbDriver);
+                LOG.warn("ApprovalJobStep: DB driver not found: {}", dbDriver);
+            }
+        }
+
+        LinkedHashMap<String, String> labels = new LinkedHashMap<>();
+        List<String> values = new ArrayList<>();
+
+        String sql = "select login, email, first_name, last_name from rduser where email is not null and email <> '' order by last_name, first_name, login";
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String email = trimOrNull(rs.getString("email"));
+                if (isBlank(email)) continue;
+                String login = trimOrNull(rs.getString("login"));
+                String first = trimOrNull(rs.getString("first_name"));
+                String last = trimOrNull(rs.getString("last_name"));
+                String displayName = buildDisplayName(login, first, last, email);
+                if (!labels.containsKey(email)) {
+                    labels.put(email, displayName);
+                    values.add(email);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("ApprovalJobStep: failed to load users: " + e.getMessage());
+            LOG.warn("ApprovalJobStep: failed to load users for dropdowns: {}", e.getMessage());
+            return UserSelectData.empty();
+        }
+
+        System.err.println("ApprovalJobStep: loaded " + values.size() + " users for dropdowns");
+        LOG.debug("ApprovalJobStep: loaded {} user emails for dropdowns", values.size());
+        return new UserSelectData(values, labels);
+    }
+
+    private static DbConfig readDbConfigFromFile() {
+        String base = System.getProperty("rdeck.base");
+        if (isBlank(base)) {
+            base = "/home/rundeck";
+        }
+        String path = base + "/server/config/rundeck-config.properties";
+        Properties props = new Properties();
+        try (InputStream in = new FileInputStream(path)) {
+            props.load(in);
+        } catch (IOException e) {
+            System.err.println("ApprovalJobStep: failed to read " + path + ": " + e.getMessage());
+            LOG.warn("ApprovalJobStep: failed to read {}: {}", path, e.getMessage());
+            return null;
+        }
+
+        String url = trimOrNull(props.getProperty("dataSource.url"));
+        String user = trimOrNull(props.getProperty("dataSource.username"));
+        String pass = props.getProperty("dataSource.password");
+        String driver = trimOrNull(props.getProperty("dataSource.driverClassName"));
+        if (isBlank(url) || isBlank(user) || pass == null) {
+            System.err.println("ApprovalJobStep: dataSource.* missing in " + path);
+            LOG.warn("ApprovalJobStep: dataSource.* missing in {}", path);
+            return null;
+        }
+        System.err.println("ApprovalJobStep: using DB config from " + path);
+        LOG.info("ApprovalJobStep: using DB config from {}", path);
+        return new DbConfig(url, user, pass, driver);
+    }
+
+    private static String trimOrNull(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static String buildDisplayName(String login, String first, String last, String email) {
+        String name;
+        if (!isBlank(first) || !isBlank(last)) {
+            name = String.format("%s %s", Objects.toString(first, ""), Objects.toString(last, "")).trim();
+        } else if (!isBlank(login)) {
+            name = login;
+        } else {
+            name = email;
+        }
+        return name + " <" + email + ">";
+    }
+
+    private static final class UserSelectData {
+        private final List<String> values;
+        private final Map<String, String> labels;
+
+        private UserSelectData(List<String> values, Map<String, String> labels) {
+            this.values = values;
+            this.labels = labels;
+        }
+
+        private static UserSelectData empty() {
+            return new UserSelectData(List.of(), Map.of());
+        }
+    }
+
+    private static final class DbConfig {
+        private final String url;
+        private final String user;
+        private final String pass;
+        private final String driver;
+
+        private DbConfig(String url, String user, String pass, String driver) {
+            this.url = url;
+            this.user = user;
+            this.pass = pass;
+            this.driver = driver;
+        }
     }
 }

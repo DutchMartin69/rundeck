@@ -20,14 +20,15 @@ This plugin adds an approval gate to a Rundeck workflow step.
 - Added callback receiver on port `5555`.
 - Added multipart email support (HTML + plain text fallback).
 - Added professional HTML template with white + green styling.
+- Added user dropdowns for approver emails (from Rundeck users).
 
 ## Configuration Fields
 
 - `approvalMessage` (required)
 - `approvalTimeoutMinutes`
 - `autoApproveOnTimeout`
-- `primaryApproverEmail` (required)
-- `secondaryApproverEmail`
+- `primaryApproverEmail` (required, dropdown + free input)
+- `secondaryApproverEmail` (dropdown + free input)
 - `escalationTimeMinutes`
 - `smtpServer` (required)
 - `smtpPort`
@@ -68,7 +69,7 @@ source "/Users/mvanson/Documents/Rundeck OSS Projects/rundeck/.java11-env.sh"
 Output jar:
 
 ```text
-plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.1.jar
+plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.8.jar
 ```
 
 ## Deploy
@@ -76,8 +77,8 @@ plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.1.jar
 Copy jar into Rundeck libext (mounted folder), then recreate container:
 
 ```bash
-cp "plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.1.jar" \
-   "../rundeck-docker-prod/rundeck_home/libext/approval-job-step-3.0.2.jar"
+cp "plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.8.jar" \
+   "../rundeck-docker-prod/rundeck_home/libext/approval-job-step-3.0.8.jar"
 
 cd "../rundeck-docker-prod"
 docker compose up -d --force-recreate
@@ -87,3 +88,4 @@ docker compose up -d --force-recreate
 
 - If links still show old host, update the active workflow step row in DB (or edit step in UI and save).
 - If SMTP fails, verify DNS/port reachability from inside container.
+- Approver dropdowns are loaded from the `rduser` table using `RUNDECK_DATABASE_URL`, `RUNDECK_DATABASE_USERNAME`, and `RUNDECK_DATABASE_PASSWORD`.
