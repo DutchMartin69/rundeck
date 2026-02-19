@@ -35,6 +35,7 @@ include	'rundeck-storage',
     'plugins:localexec-plugin',
     'plugins:script-plugin',
     'plugins:script-node-step-plugin',
+    'plugins:llm-workflow-step-plugin',
     'plugins:stub-plugin',
     'plugins:copyfile-plugin',
     'plugins:job-state-plugin',
@@ -74,4 +75,3 @@ def enableIncremental = projectFeatureEnabled('rundeck.proj.incremental.enabled'
 if (enableIncremental) {
     enableFeaturePreview('GROOVY_COMPILATION_AVOIDANCE')
 }
-
