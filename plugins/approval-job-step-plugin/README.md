@@ -1,91 +1,173 @@
-# Approval Job Step Plugin (Fixed)
+<h1 align="center">Rundeck Approval Job Step Plugin</h1>
 
-This plugin adds an approval gate to a Rundeck workflow step.
+<p align="center">
+  <strong>Project-scoped approval gates for Rundeck workflows with email or Slack delivery</strong>
+</p>
 
-## What It Does
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#screenshots">Screenshots</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#configuration">Configuration</a> •
+  <a href="#uninstall">Uninstall</a> •
+  <a href="#operations-capacity">Operations & Capacity</a>
+</p>
 
-- Sends an approval email to the primary approver.
-- Optionally escalates to a secondary approver after `escalationTimeMinutes`.
-- Adds approve/deny links with tokenized callbacks.
-- Waits for callback response and then:
-  - continues on `approved`
-  - fails on `denied`
-  - times out (or auto-approves if configured)
+<p align="center">
+  <img src="https://img.shields.io/badge/Rundeck-Community-5C9E3D?logo=rundeck&logoColor=white" alt="Rundeck Community"/>
+  <img src="https://img.shields.io/badge/WorkflowStep-Approval-0F1E57" alt="Workflow Step"/>
+  <img src="https://img.shields.io/badge/Notifications-Email%20or%20Slack-4A154B" alt="Email or Slack"/>
+  <img src="https://img.shields.io/badge/License-MIT-blue" alt="MIT License"/>
+</p>
 
-## Key Fixes Included
+---
 
-- Fixed `StepException` usage for Rundeck 5.x compatibility.
-- Fixed key storage password retrieval using Rundeck API (no reflective access).
-- Fixed typed config handling (`Integer`/`Boolean` fields).
-- Added callback receiver on port `5555`.
-- Added multipart email support (HTML + plain text fallback).
-- Added professional HTML template with white + green styling.
-- Added user dropdowns for approver emails (from Rundeck users).
+## Overview
 
-## Configuration Fields
+This plugin adds an **Approval Job Step** to Rundeck workflows.
 
-- `approvalMessage` (required)
-- `approvalTimeoutMinutes`
-- `autoApproveOnTimeout`
-- `primaryApproverEmail` (required, dropdown + free input)
-- `secondaryApproverEmail` (dropdown + free input)
-- `escalationTimeMinutes`
-- `smtpServer` (required)
-- `smtpPort`
-- `smtpUsername` (required)
-- `smtpPasswordPath` (required, e.g. `keys/quicknet/QuickNet Mail`)
-- `fromEmailAddress` (required)
-- `useTls`
-- `approvalUrlBase` (for local demo: `http://localhost:5555`)
-- `checkIntervalSeconds`
+It lets a workflow pause for human approval using centrally managed, project-scoped approval settings. Notifications can be sent by **email** or **Slack DM**, and approval actions route back through the Rundeck web app.
 
-## Local Demo Requirements
+### Key features
 
-1. Docker compose must expose callback port:
+- Workflow step plugin installable as a single JAR
+- Project-level approval profiles: `Approval 1` and `Approval 2`
+- Delivery by **Email** or **Slack**
+- Optional secondary approver escalation
+- Timeout behavior with auto-approve or fail/terminate
+- Rundeck-hosted approval landing page and approve/deny callbacks
+- SMTP and Slack secrets stored in Rundeck Key Storage
+- Test actions for SMTP, email delivery, Slack connection, and Slack delivery
 
-```yaml
-ports:
-  - "4440:4440"
-  - "5555:5555"
-```
+## Screenshots
 
-2. Job step `approvalUrlBase` should be:
+### Project Approvals Overview
 
-```text
-http://localhost:5555
-```
+![Project Approvals Overview](docs/images/approvals-overview.png)
 
-3. Run job and click approve/deny link from the same machine.
+### Email Configuration
 
-## Build
+![Email Configuration](docs/images/email-configuration.png)
 
-This plugin is standalone and can be built with:
+### Slack Configuration
+
+![Slack Configuration](docs/images/slack-configuration.png)
+
+## Compatibility
+
+| Platform | Version |
+|----------|---------|
+| Rundeck Community | 5.x |
+| Runbook Automation (Self-Hosted) | 5.x |
+
+## Release
+
+- Current version: `3.1.0`
+- Artifact: `releases/approval-job-step-3.1.0.jar`
+- Release notes: `releases/CHANGELOG-3.1.0.md`
+
+## Installation
+
+Download the latest JAR from [Releases](../../releases) and install it via the Rundeck UI:
+
+1. Open **System Menu** -> **Plugins** -> **Upload Plugin**
+2. Select `approval-job-step-3.1.0.jar`
+3. Save/upload and reload plugins or restart Rundeck if your environment caches plugins
+
+### Alternative CLI install
 
 ```bash
-source "/Users/mvanson/Documents/Rundeck OSS Projects/rundeck/.java11-env.sh"
-"/Users/mvanson/Documents/Rundeck OSS Projects/rundeck/gradlew" -p "/Users/mvanson/Documents/Rundeck OSS Projects/rundeck/plugins/approval-job-step-plugin" clean build --no-daemon
+cp releases/approval-job-step-3.1.0.jar "$RDECK_BASE/libext/"
+# then reload plugins or restart Rundeck
 ```
 
-Output jar:
+## Configuration
 
-```text
-plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.8.jar
-```
+Configure the plugin from the project-level **Approvals** settings page.
 
-## Deploy
+### Approvers tab
 
-Copy jar into Rundeck libext (mounted folder), then recreate container:
+- `Approval 1`
+  - primary approver
+  - secondary approver
+  - escalation time
+- `Approval 2`
+  - primary approver
+  - secondary approver
+  - escalation time
 
-```bash
-cp "plugins/approval-job-step-plugin/build/libs/approval-job-step-fixed-3.0.8.jar" \
-   "../rundeck-docker-prod/rundeck_home/libext/approval-job-step-3.0.8.jar"
+### Email Configuration tab
 
-cd "../rundeck-docker-prod"
-docker compose up -d --force-recreate
-```
+- SMTP server
+- SMTP port
+- SMTP username
+- SMTP password path
+- From email address
+- Use TLS
+- SMTP connection test
+- Test email delivery
 
-## Notes
+### Slack Configuration tab
 
-- If links still show old host, update the active workflow step row in DB (or edit step in UI and save).
-- If SMTP fails, verify DNS/port reachability from inside container.
-- Approver dropdowns are loaded from the `rduser` table using `RUNDECK_DATABASE_URL`, `RUNDECK_DATABASE_USERNAME`, and `RUNDECK_DATABASE_PASSWORD`.
+- Slack bot token path
+- Slack connection test
+- Slack user selection from workspace users
+- Test Slack delivery
+
+### Shared Advanced Options
+
+- Approval URL base
+- Check interval
+
+## Workflow Step Usage
+
+Add **Approval Job Step** to a workflow and configure:
+
+- `Approval Profile`
+- `Approval Message`
+- `Auto-approve on Timeout`
+
+The project-level approval settings control who is notified and how delivery happens.
+
+### Example job definition
+
+- `examples/approval-gate-example.yaml`
+
+## Uninstall
+
+This remains a standard installable/uninstallable Rundeck plugin.
+
+To uninstall:
+
+1. Remove `approval-job-step-3.1.0.jar` from `$RDECK_BASE/libext/`
+2. Reload plugins or restart Rundeck
+
+Any saved project approval settings become inactive once the plugin JAR is removed.
+
+## Operations & Capacity
+
+**Important:** Pending approvals keep execution resources active until approved, denied, or timed out.
+
+Operational impact at scale:
+
+- Open approvals consume active execution/worker capacity
+- Too many pending approvals can delay other jobs
+- Long escalation windows increase how long resources stay reserved
+- Keep timeouts and escalation settings intentional and monitored
+
+See:
+
+- `docs/install-and-setup.md`
+- `docs/configuration-reference.md`
+- `docs/operations-and-capacity.md`
+- `docs/troubleshooting.md`
+
+## License
+
+MIT License — see `LICENSE`.
+
+---
+
+<p align="center">
+  <sub>Part of <a href="https://github.com/rundecktoolkit">rundecktoolkit</a> — Community plugins for Rundeck</sub>
+</p>
